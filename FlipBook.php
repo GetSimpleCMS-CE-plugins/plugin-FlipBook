@@ -105,6 +105,8 @@ function FlipBook_default_settings() {
 		'show_cover'          => true,
 		'sound'               => true,
 		'single_page_mobile'  => true,
+		'show_page_numbers'   => true,
+		'show_nav_buttons'    => true,
 	];
 }
 
@@ -118,6 +120,8 @@ function FlipBook_sanitize_settings($in) {
 		'show_cover'         => !empty($in['show_cover']),
 		'sound'              => !empty($in['sound']),
 		'single_page_mobile' => !empty($in['single_page_mobile']),
+		'show_page_numbers'  => !empty($in['show_page_numbers']),
+		'show_nav_buttons'   => !empty($in['show_nav_buttons']),
 	];
 }
 
@@ -548,6 +552,8 @@ function FlipBook_frontend_assets() {
 	if (empty($FlipBook_page_has_embed)) return;
 	?>
 <link rel="stylesheet" href="<?= FlipBook_PLUGIN_URL ?>css/frontend.css">
+<link rel="stylesheet" href="<?= FlipBook_PLUGIN_URL ?>css/glightbox.min.css">
+<script src="<?= FlipBook_PLUGIN_URL ?>js/glightbox.min.js"></script>
 <script src="<?= FlipBook_PLUGIN_URL ?>js/page-flip.browser.js"></script>
 <script type="module">
 	// Same reasoning as the admin side: pdf.min.mjs is an ES module, so it has

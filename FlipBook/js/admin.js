@@ -10,6 +10,16 @@
 		return String(str == null ? '' : str).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 	}
 
+	// Mirrors FlipBook_thumb_url()'s naming convention server-side (data/thumbs/<subdir>/thumbnail.<basename>).
+	// Not guaranteed to exist (e.g. FTP-added files were never thumbnailed) - callers
+	// should pair this with an <img onerror> fallback to the full-size image.
+	function fbThumbUrlFor(file) {
+		var parts = file.split('/');
+		var basename = parts.pop();
+		var subdir = parts.length ? parts.join('/') + '/' : '';
+		return FlipBookData.thumbUrl + (subdir + 'thumbnail.' + basename).split('/').map(encodeURIComponent).join('/');
+	}
+
 	// ─────────────────────────────────────────────────────────────────────────
 	// LIST VIEW
 	// ─────────────────────────────────────────────────────────────────────────
@@ -50,6 +60,11 @@
 		link.href = editUrl(book.id);
 		link.textContent = book.name;
 		tdName.appendChild(link);
+		var pageCount = document.createElement('span');
+		pageCount.className = 'fb-page-count';
+		var n = (book.pages || []).length;
+		pageCount.textContent = ' (' + n + ' ' + (n === 1 ? FlipBookData.i18n.pageSingular : FlipBookData.i18n.pagePlural) + ')';
+		tdName.appendChild(pageCount);
 
 		var tdSlug = document.createElement('td');
 		tdSlug.textContent = book.slug;
@@ -187,8 +202,12 @@
 				thumb.innerHTML = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#b91c1c" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>';
 			} else {
 				var img = document.createElement('img');
-				img.src = FlipBookData.uploadUrl + page.file.split('/').map(encodeURIComponent).join('/');
+				img.src = fbThumbUrlFor(page.file);
 				img.alt = '';
+				img.onerror = function () {
+					this.onerror = null;
+					this.src = FlipBookData.uploadUrl + page.file.split('/').map(encodeURIComponent).join('/');
+				};
 				thumb.appendChild(img);
 			}
 			card.appendChild(thumb);
@@ -656,7 +675,20 @@
 		} else {
 			_fbPdfSelected.splice(idx, 1);
 		}
-		// Renumber every badge so the click order is always visible, not just selected/unselected
+		fbRenumberPdfBadges();
+	}
+
+	window.fbSelectAllPdfPages = function () {
+		var grid = document.getElementById('fb-pdfpicker-grid');
+		var pages = Array.from(grid.querySelectorAll('.fb-pdfpicker-page'))
+			.map(function (el) { return parseInt(el.dataset.page, 10); })
+			.sort(function (a, b) { return a - b; });
+		_fbPdfSelected = pages;
+		fbRenumberPdfBadges();
+	};
+
+	// Renumbers every badge so the click order is always visible, not just selected/unselected
+	function fbRenumberPdfBadges() {
 		var grid = document.getElementById('fb-pdfpicker-grid');
 		grid.querySelectorAll('.fb-pdfpicker-page').forEach(function (el) {
 			var p = parseInt(el.dataset.page, 10);

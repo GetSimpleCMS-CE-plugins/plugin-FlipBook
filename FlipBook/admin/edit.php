@@ -16,7 +16,7 @@ if ($fb_id && !$fb_book) {
 	return;
 }
 
-$fb_settings = $fb_book['settings'] ?? FlipBook_default_settings();
+$fb_settings = array_merge(FlipBook_default_settings(), $fb_book['settings'] ?? []);
 $fb_pages    = $fb_book['pages']    ?? [];
 ?>
 <div class="fb-admin">
@@ -70,6 +70,14 @@ $fb_pages    = $fb_book['pages']    ?? [];
 				<input type="checkbox" name="settings[single_page_mobile]" <?= !empty($fb_settings['single_page_mobile']) ? 'checked' : '' ?>>
 				<?php i18n(FlipBook_SLUG . '/lang_Single_Page_Mobile'); ?>
 			</label>
+			<label class="fb-checkbox">
+				<input type="checkbox" name="settings[show_page_numbers]" <?= !empty($fb_settings['show_page_numbers']) ? 'checked' : '' ?>>
+				<?php i18n(FlipBook_SLUG . '/lang_Show_Page_Numbers'); ?>
+			</label>
+			<label class="fb-checkbox">
+				<input type="checkbox" name="settings[show_nav_buttons]" <?= !empty($fb_settings['show_nav_buttons']) ? 'checked' : '' ?>>
+				<?php i18n(FlipBook_SLUG . '/lang_Show_Nav_Buttons'); ?>
+			</label>
 		</fieldset>
 
 		<fieldset class="fb-fieldset">
@@ -113,6 +121,7 @@ $fb_pages    = $fb_book['pages']    ?? [];
 			<p class="fb-muted" id="fb-pdfpicker-status"></p>
 			<div class="fb-pdfpicker-grid" id="fb-pdfpicker-grid"></div>
 			<div class="fb-modal-footer">
+				<button type="button" class="fb-btn fb-btn-secondary" onclick="fbSelectAllPdfPages()"><?php i18n(FlipBook_SLUG . '/lang_Select_All'); ?></button>
 				<button type="button" class="fb-btn fb-btn-secondary" onclick="fbClosePdfPicker()"><?php i18n(FlipBook_SLUG . '/lang_Cancel'); ?></button>
 				<button type="button" class="fb-btn fb-btn-primary" onclick="fbInsertPdfPages()"><?php i18n(FlipBook_SLUG . '/lang_Insert_Selected_Pages'); ?></button>
 			</div>
@@ -194,6 +203,7 @@ var FlipBookData = {
 	ajaxUrl: '?id=<?= FlipBook_SLUG ?>',
 	nonce: '<?= get_nonce('flipbook', FlipBook_SLUG . '.php') ?>',
 	uploadUrl: <?= json_encode(FlipBook_UPLOAD_URL) ?>,
+	thumbUrl: <?= json_encode(FlipBook_THUMB_URL) ?>,
 	pdfWorkerUrl: <?= json_encode(FlipBook_PLUGIN_URL . 'js/pdf.worker.min.mjs') ?>,
 	isNew: <?= $fb_book ? 'false' : 'true' ?>,
 	pages: <?= json_encode($fb_pages) ?>,

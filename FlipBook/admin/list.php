@@ -41,7 +41,9 @@ var FlipBookData = {
 		confirmDelete: <?= json_encode(i18n_r(FlipBook_SLUG . '/lang_Confirm_Delete')) ?>,
 		edit: <?= json_encode(i18n_r(FlipBook_SLUG . '/lang_Edit')) ?>,
 		delete: <?= json_encode(i18n_r(FlipBook_SLUG . '/lang_Delete')) ?>,
-		saveError: <?= json_encode(i18n_r(FlipBook_SLUG . '/lang_Save_Error')) ?>
+		saveError: <?= json_encode(i18n_r(FlipBook_SLUG . '/lang_Save_Error')) ?>,
+		pageSingular: <?= json_encode(i18n_r(FlipBook_SLUG . '/lang_Page_Singular')) ?>,
+		pagePlural: <?= json_encode(i18n_r(FlipBook_SLUG . '/lang_Page_Plural')) ?>
 	}
 };
 </script>
