@@ -170,24 +170,43 @@
 		var settings = data.settings || {};
 		container.classList.add('flipbook-loading');
 
-		// Pages are built off-DOM first (async, since PDF pages need to be
-		// rendered) and only handed to StPageFlip once every page is ready,
-		// rather than trying to update pages in place after the fact.
+		// StPageFlip is handed its own inner element (bookEl), not the outer
+		// container. Reason: the library sets `min-height` on whatever element
+		// it's given, derived from its own internal default bounds (100px)
+		// unless min/max are explicitly configured - and since its page
+		// elements are all position:absolute, that min-height is the ONLY
+		// thing establishing the element's height for layout purposes. Left as
+		// the container itself, anything appended after it (our toolbar, or
+		// any of the site's own content) would sit underneath the book's real
+		// visual size rather than below it. Giving the library its own
+		// element, then setting that element's height explicitly ourselves,
+		// keeps bookEl's reserved space correct while letting the toolbar
+		// live as a normal sibling that properly pushes later content down.
+		var bookEl = document.createElement('div');
+		bookEl.className = 'flipbook-book';
+		container.appendChild(bookEl);
+
 		var stage = document.createElement('div');
 		stage.className = 'flipbook-stage';
 
 		Promise.all((data.pages || []).map(function (page) { return buildPage(data.uploadUrl, page); }))
 			.then(function (pageEls) {
 				pageEls.forEach(function (el) { stage.appendChild(el); });
-				container.appendChild(stage);
+				bookEl.appendChild(stage);
 
-				var pageFlip = new St.PageFlip(container, {
+				var bookHeight = settings.height || 800;
+				var pageFlip = new St.PageFlip(bookEl, {
 					width: settings.width || 600,
-					height: settings.height || 800,
+					height: bookHeight,
 					size: settings.size === 'fixed' ? 'fixed' : 'stretch',
 					showCover: !!settings.show_cover,
 					usePortrait: !!settings.single_page_mobile
 				});
+				// Backstop the library's own min-height default (100px) with the
+				// book's actual configured height, so bookEl reserves roughly the
+				// right amount of space even before any finer per-viewport
+				// adjustment the library makes internally.
+				bookEl.style.minHeight = bookHeight + 'px';
 
 				var pageNodes = stage.querySelectorAll('.flipbook-page');
 				// The library's own docs are inconsistent about the casing of this
@@ -202,7 +221,6 @@
 				if (settings.show_nav_buttons || settings.show_page_numbers) {
 					buildToolbar(container, pageFlip, settings);
 				}
-				buildFullscreenButton(container, pageFlip);
 
 				// Free addition alongside the nav buttons: left/right arrow keys flip
 				// pages once the book has focus. Scoped per-container (not document-wide)
@@ -227,8 +245,11 @@
 			});
 	}
 
-	// One combined row: prev button, page indicator, next button - only the
-	// pieces the settings actually asked for are included.
+	// One combined row: prev button, page indicator, fullscreen toggle, next
+	// button - only the pieces the settings actually asked for are included.
+	// Lives as a normal (non-absolutely-positioned) sibling after the book, so
+	// it reserves its own space in the page's normal flow instead of floating
+	// over whatever content comes next.
 	function buildToolbar(container, pageFlip, settings) {
 		var toolbar = document.createElement('div');
 		toolbar.className = 'flipbook-toolbar';
@@ -255,6 +276,10 @@
 			if (typeof pageFlip.on === 'function') pageFlip.on('flip', update);
 		}
 
+		if (document.fullscreenEnabled) {
+			toolbar.appendChild(buildFullscreenButton(container, pageFlip));
+		}
+
 		if (settings.show_nav_buttons) {
 			var next = document.createElement('button');
 			next.type = 'button';
@@ -268,14 +293,12 @@
 		container.appendChild(toolbar);
 	}
 
-	// Toggles the book container itself into the browser's Fullscreen API.
+	// Toggles the outer container into the browser's Fullscreen API.
 	// NOTE: whether StPageFlip reflows cleanly on a fullscreen-driven size
 	// change (as opposed to a window resize) hasn't been confirmed - the
-	// update() call below is a best-effort nudge, and this is worth
-	// specifically checking in real testing.
+	// update() call below is a best-effort nudge, worth specifically checking
+	// in real testing.
 	function buildFullscreenButton(container, pageFlip) {
-		if (!document.fullscreenEnabled) return;
-
 		var btn = document.createElement('button');
 		btn.type = 'button';
 		btn.className = 'flipbook-fullscreen-btn';
@@ -299,7 +322,7 @@
 			if (typeof pageFlip.update === 'function') pageFlip.update();
 		});
 
-		container.appendChild(btn);
+		return btn;
 	}
 
 	ready(function () {
