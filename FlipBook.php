@@ -9,13 +9,6 @@ Author URI: https://ko-fi.com/ericmontgomery
 */
 
 // ─── Constants ───────────────────────────────────────────────────────────────
-
-// $SITEURL can report http:// even when the site is actually being served over
-// https (a documented GS-CE quirk on some live server configs). Getting this
-// wrong means URLs we build (uploads, thumbs, the plugin's own asset paths)
-// point at http:// on an https page, which browsers silently block as mixed
-// content for fetch()/XHR-driven loads (PDF.js) even though a plain <img> tag
-// often tolerates it - which is exactly the "images work, PDF.js doesn't" split.
 function FlipBook_site_url() {
 	global $SITEURL;
 	$is_https = (!empty($_SERVER['HTTPS']) && strtolower($_SERVER['HTTPS']) !== 'off')
@@ -37,8 +30,6 @@ define('FlipBook_UPLOAD_URL', FlipBook_site_url() . 'data/uploads/');
 define('FlipBook_THUMB_DIR',  GSTHUMBNAILPATH);
 define('FlipBook_THUMB_URL',  FlipBook_site_url() . 'data/thumbs/');
 
-// i18n namespace built from the constant so a future rename doesn't silently
-// break every i18n_r() lookup.
 i18n_merge(FlipBook_SLUG) || i18n_merge(FlipBook_SLUG, 'en_US');
 
 // ─── Bootstrap ───────────────────────────────────────────────────────────────
@@ -50,35 +41,29 @@ register_plugin(
 	'risingisland',
 	'https://ko-fi.com/ericmontgomery',
 	'Flip-book builder using StPageFlip and PDF.js',
-	'theme',
+	'pages',
 	'FlipBook_admin_page'
 );
 
-add_action('theme-sidebar', 'createSideMenu', array(
+add_action('pages-sidebar', 'createSideMenu', array(
 	FlipBook_SLUG,
-	i18n_r(FlipBook_SLUG . '/lang_Menu_Title') . ' <svg xmlns="http://www.w3.org/2000/svg" style="vertical-align:middle;" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6c-2.5-1.5-5.5-2-8-1.5v13c2.5-.5 5.5 0 8 1.5c2.5-1.5 5.5-2 8-1.5v-13c-2.5-.5-5.5 0-8 1.5Z"/><path d="M12 6v13"/></svg>',
+	i18n_r(FlipBook_SLUG . '/lang_Menu_Title') . ' <svg xmlns="http://www.w3.org/2000/svg" style="vertical-align:middle;" width="20" height="20" viewBox="0 0 24 24"><path d="M0 0h24v24H0z" fill="none"/><path fill="#c30" d="m19 1l-5 5v11l5-4.5zm2 4v13.5c-1.1-.35-2.3-.5-3.5-.5c-1.7 0-4.15.65-5.5 1.5V6c-1.45-1.1-3.55-1.5-5.5-1.5S2.45 4.9 1 6v14.65c0 .25.25.5.5.5c.1 0 .15-.05.25-.05C3.1 20.45 5.05 20 6.5 20c1.95 0 4.05.4 5.5 1.5c1.35-.85 3.8-1.5 5.5-1.5c1.65 0 3.35.3 4.75 1.05c.1.05.15.05.25.05c.25 0 .5-.25.5-.5V6c-.6-.45-1.25-.75-2-1M10 18.41C8.75 18.09 7.5 18 6.5 18c-1.06 0-2.32.19-3.5.5V7.13c.91-.4 2.14-.63 3.5-.63s2.59.23 3.5.63z"/></svg>',
 	'?id=' . FlipBook_SLUG
 ));
 
-// Front-end: [flipbook id="1"] / [flipbook slug="..."] shortcode, and the matching
-// get_FlipBook() theme template tag.
 add_filter('content', 'FlipBook_shortcode_filter');
 
-// Front-end asset loading (StPageFlip, PDF.js, frontend.js/css) has to go through
-// theme-footer, not the content filter above: get_page_content() runs
-// strip_content() AFTER content filters, which strips <script>/<link> tags out of
-// whatever the shortcode returns. theme-footer runs separately and isn't stripped.
 add_action('theme-footer', 'FlipBook_frontend_assets');
 
 FlipBook_init_storage();
 
-// ── Early AJAX intercept ──────────────────────────────────────────────────────
+// ── AJAX intercept ──────────────────────────────────────────────────────
 if (
 	!empty($_REQUEST['fb_action']) &&
 	isset($_GET['id']) && $_GET['id'] === FlipBook_SLUG
 ) {
 	FlipBook_handle_ajax($_REQUEST['fb_action']);
-	// FlipBook_handle_ajax() always exit()s - this is a safety net:
+	
 	exit;
 }
 
@@ -125,10 +110,6 @@ function FlipBook_sanitize_settings($in) {
 	];
 }
 
-// One page entry is one of:
-//   {"type":"image", "file":"photo.jpg"}
-//   {"type":"image_text", "file":"photo.jpg", "text":"<p>...</p>", "text_position":"above"|"below"}
-//   {"type":"pdf", "file":"catalog.pdf", "page":3}   <- added in a later phase
 function FlipBook_sanitize_pages($in) {
 	if (!is_array($in)) return [];
 	$out = [];
@@ -156,7 +137,6 @@ function FlipBook_sanitize_pages($in) {
 	return $out;
 }
 
-// Normalise a submitted upload path: forward slashes, no traversal, no leading slash
 function FlipBook_sanitize_upload_filename($filename) {
 	$filename = str_replace('\\', '/', (string)$filename);
 	$filename = preg_replace('/\.\.+/', '', $filename);
@@ -237,7 +217,7 @@ function FlipBook_delete_book($id) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// UPLOADS  (shared file browser: images now, PDFs added in a later phase)
+// UPLOADS
 // ─────────────────────────────────────────────────────────────────────────────
 
 function FlipBook_allowed_ext($type) {
@@ -256,7 +236,6 @@ function FlipBook_thumb_url($filename) {
 	return FlipBook_UPLOAD_URL . implode('/', array_map('rawurlencode', explode('/', $filename)));
 }
 
-// Recursively list uploaded files of the given type ('image' | 'pdf')
 function FlipBook_get_uploads($type) {
 	$files   = [];
 	$allowed = FlipBook_allowed_ext($type);
@@ -290,7 +269,7 @@ function FlipBook_get_uploads($type) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// ADMIN PAGE  (entry point called by GS - routes to sub-pages)
+// ADMIN PAGE
 // ─────────────────────────────────────────────────────────────────────────────
 
 function FlipBook_admin_page() {
@@ -310,11 +289,6 @@ function FlipBook_admin_page() {
 function FlipBook_handle_ajax($action) {
 	header('Content-Type: application/json');
 
-	// When an uploaded file's request body exceeds php.ini's post_max_size,
-	// PHP silently empties BOTH $_POST and $_FILES - no warning reaches this
-	// code. Left unchecked, that looks identical to a bad nonce ($_POST['nonce']
-	// is just as empty), which is a confusing error to debug from. Catch the
-	// specific signature here and say what's actually wrong.
 	if ($action === 'upload_file' && empty($_POST) && empty($_FILES) && !empty($_SERVER['CONTENT_LENGTH']) && (int)$_SERVER['CONTENT_LENGTH'] > 0) {
 		echo json_encode(['ok' => false, 'msg' => i18n_r(FlipBook_SLUG . '/lang_Upload_Too_Large_For_Server')]);
 		exit;
@@ -518,9 +492,6 @@ function get_FlipBook($id_or_slug) {
 	if ($book) echo FlipBook_render($book);
 }
 
-// Renders the container div only - safe to return straight from the content
-// filter since it's plain HTML with no <script>/<link> tags to be stripped.
-// The actual book gets built client-side by frontend.js reading data-flipbook.
 function FlipBook_render($book) {
 	global $FlipBook_page_has_embed;
 	$FlipBook_page_has_embed = true;
@@ -544,9 +515,6 @@ function FlipBook_render($book) {
 		. htmlspecialchars(json_encode($payload), ENT_QUOTES, 'UTF-8') . '"></div>';
 }
 
-// Loads StPageFlip, PDF.js, and frontend.js/css - only on pages that actually
-// used a flip-book (the flag is set by FlipBook_render() above, which only runs
-// when the shortcode/template tag matched something).
 function FlipBook_frontend_assets() {
 	global $FlipBook_page_has_embed;
 	if (empty($FlipBook_page_has_embed)) return;
@@ -556,9 +524,6 @@ function FlipBook_frontend_assets() {
 <script src="<?= FlipBook_PLUGIN_URL ?>js/glightbox.min.js"></script>
 <script src="<?= FlipBook_PLUGIN_URL ?>js/page-flip.browser.js"></script>
 <script type="module">
-	// Same reasoning as the admin side: pdf.min.mjs is an ES module, so it has
-	// to be imported here and exposed as a normal global for the classic
-	// frontend.js script below to use.
 	import * as pdfjsLib from '<?= FlipBook_PLUGIN_URL ?>js/pdf.min.mjs';
 	window.pdfjsLib = pdfjsLib;
 </script>

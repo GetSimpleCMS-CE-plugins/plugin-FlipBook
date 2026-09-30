@@ -10,14 +10,24 @@
 		return String(str == null ? '' : str).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 	}
 
-	// Mirrors FlipBook_thumb_url()'s naming convention server-side (data/thumbs/<subdir>/thumbnail.<basename>).
-	// Not guaranteed to exist (e.g. FTP-added files were never thumbnailed) - callers
-	// should pair this with an <img onerror> fallback to the full-size image.
 	function fbThumbUrlFor(file) {
 		var parts = file.split('/');
 		var basename = parts.pop();
 		var subdir = parts.length ? parts.join('/') + '/' : '';
 		return FlipBookData.thumbUrl + (subdir + 'thumbnail.' + basename).split('/').map(encodeURIComponent).join('/');
+	}
+
+	var _fbStatusFadeTimer = null;
+	function fbFadeStatus(el) {
+		if (_fbStatusFadeTimer) clearTimeout(_fbStatusFadeTimer);
+		el.classList.remove('fb-status-fade');
+		_fbStatusFadeTimer = setTimeout(function () {
+			el.classList.add('fb-status-fade');
+			setTimeout(function () {
+				el.textContent = '';
+				el.className = '';
+			}, 600); // matches the CSS transition duration
+		}, 2500);
 	}
 
 	// ─────────────────────────────────────────────────────────────────────────
@@ -128,8 +138,6 @@
 			status.textContent = '';
 			status.className = '';
 
-			// Pages array lives in memory (_fbPages) while editing - sync it into
-			// the hidden field right before the form is serialised.
 			document.getElementById('fb-pages-json').value = JSON.stringify(_fbPages);
 
 			var body = new FormData(form);
@@ -148,6 +156,7 @@
 
 					status.textContent = FlipBookData.i18n.saved;
 					status.className = 'fb-ok';
+					fbFadeStatus(status);
 
 					if (FlipBookData.isNew) {
 						window.location.href = editUrl(res.id);
@@ -338,8 +347,7 @@
 	};
 
 	// ─────────────────────────────────────────────────────────────────────────
-	// AUTUMNNOTE — mounted the same defensive way as the Items Manager plugin,
-	// since the library's real API surface isn't documented anywhere we can rely on.
+	// AUTUMNNOTE 
 	// ─────────────────────────────────────────────────────────────────────────
 
 	function mountAutumnNote(targetEl) {
@@ -375,11 +383,6 @@
 		return inst;
 	}
 
-	// Rebuilds the underlying textarea from scratch and mounts a fresh AutumnNote
-	// instance on it. Since we don't know whether AutumnNote exposes a reliable
-	// destroy()/reset() method, the safest way to reuse the same modal for both
-	// "add" and "edit" is to throw away whatever DOM AutumnNote built last time
-	// and start from a brand-new <textarea> each time the modal opens.
 	function resetTextPageEditor(initialValue) {
 		var wrap = document.getElementById('fb-textpage-editor-wrap');
 		if (!wrap) return;
@@ -409,8 +412,7 @@
 	}
 
 	// ─────────────────────────────────────────────────────────────────────────
-	// FILE BROWSER — generic picker used by both "Add Image Page" and the
-	// Image+Text modal's image picker. `context` says what to do on selection.
+	// FILE BROWSER
 	// ─────────────────────────────────────────────────────────────────────────
 
 	var _fbFiles = [];
@@ -576,9 +578,7 @@
 	};
 
 	// ─────────────────────────────────────────────────────────────────────────
-	// PDF PAGE PICKER — renders every page of a chosen PDF as a thumbnail via
-	// PDF.js, lets the user multi-select pages, inserts one "pdf" page entry
-	// per selected page in the order they were clicked.
+	// PDF PAGE PICKER
 	// ─────────────────────────────────────────────────────────────────────────
 
 	var _fbPdfFile = '';
@@ -592,10 +592,7 @@
 			window.alert(FlipBookData.i18n.pdfjsNotLoaded);
 			return;
 		}
-		// The PDF.js module shim (a <script type="module">) runs deferred - i.e.
-		// after this classic script has already finished executing once - so the
-		// worker path can only be configured here, on first actual use, not at
-		// the top of this file.
+		
 		if (!_fbPdfWorkerConfigured && FlipBookData.pdfWorkerUrl) {
 			pdfjsLib.GlobalWorkerOptions.workerSrc = FlipBookData.pdfWorkerUrl;
 			_fbPdfWorkerConfigured = true;

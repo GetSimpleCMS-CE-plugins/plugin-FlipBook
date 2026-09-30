@@ -7,10 +7,6 @@
 	min-height: 60px;
 }
 
-/* This is the element actually handed to `new St.PageFlip()`. Left unstyled
-   for `position` on purpose - the library adds its own .stf__parent class
-   (position: relative) and sets min-height itself; see the comment in
-   frontend.js on why bookEl exists as a separate element from .flipbook-embed. */
 .flipbook-book {
 	width: 100%;
 }
@@ -26,8 +22,6 @@
 	border-radius: 6px;
 }
 
-/* Pages live in a hidden staging wrapper until StPageFlip takes ownership of
-   them via loadFromHTML/loadFromHtml. */
 .flipbook-stage { display: none; }
 
 .flipbook-embed.flipbook-loading::before {
@@ -57,10 +51,17 @@
 }
 
 .flipbook-page-text {
-	display: flex;
+	display: flex !important;
 	flex-direction: column;
 }
-.flipbook-page-text img { flex: 1 1 auto; min-height: 0; object-fit: cover; }
+
+.flipbook-page.flipbook-page-text img {
+	flex: 1 1 0;
+	min-height: 0;
+	width: 100%;
+	height: auto;
+	object-fit: cover;
+}
 .flipbook-text-above { flex-direction: column-reverse; }
 
 .flipbook-page-text-content {
@@ -77,11 +78,6 @@
 .flipbook-embed:focus { outline: none; }
 .flipbook-embed:focus-visible { outline: 2px solid #2764e7; outline-offset: 4px; }
 
-/* Combined toolbar: prev button, page indicator, fullscreen toggle, next
-   button - only whichever pieces the settings asked for actually get added
-   by JS. A normal flex row in the document's own flow (NOT absolutely
-   positioned), so it reserves its own space below the book instead of
-   floating over whatever content comes after it on the page. */
 .flipbook-toolbar {
 	display: flex;
 	align-items: center;
@@ -116,15 +112,6 @@
 	white-space: nowrap;
 }
 
-/* Per-page zoom button, top-center of each page so it stays clear of the
-   left/right page-turn zones. Hidden until hover on devices that have one,
-   always present (at reduced opacity) on touch since there's no hover to
-   reveal it. IMPORTANT: do NOT set `position` on .flipbook-page - StPageFlip
-   adds its own .stf__item class with `position: absolute` and relies on it to
-   stack pages on top of each other; overriding it drops pages back into
-   normal flow, so the next page renders below the current one mid-flip.
-   Pages are already absolutely positioned, which is all the zoom button
-   needs to anchor to. */
 .flipbook-zoom-btn {
 	position: absolute;
 	top: 8px;
@@ -151,8 +138,6 @@
 	.flipbook-zoom-btn { opacity: .6; }
 }
 
-/* Fullscreen toggle now lives inside .flipbook-toolbar as a normal member,
-   not a separately floating button - styled the same as the nav buttons. */
 .flipbook-fullscreen-btn {
 	width: 36px;
 	height: 36px;
@@ -170,10 +155,6 @@
 .flipbook-fullscreen-btn:hover { background: #fff; }
 .flipbook-fullscreen-btn svg { width: 16px; height: 16px; }
 
-/* Theme-proofing for the three control buttons. Many themes give every <button>
-   padding (and/or cap svg width with max-width:100%), which squeezes the icon
-   inside these small fixed-size circles down to almost nothing. Reset it
-   explicitly, scoped under .flipbook-embed so it outranks generic theme rules. */
 .flipbook-embed button.flipbook-nav,
 .flipbook-embed button.flipbook-zoom-btn,
 .flipbook-embed button.flipbook-fullscreen-btn {
@@ -204,4 +185,31 @@
 	height: 100vh;
 	justify-content: center;
 	background: #1a1a2e;
+}
+
+.--left {
+	-webkit-box-shadow: -3px 0px 15px 1px rgba(0,0,0,0.2); 
+	box-shadow: -3px 0px 15px 1px rgba(0,0,0,0.2);
+}
+.--left:hover {
+	-webkit-box-shadow: -5px 0px 15px 1px rgba(0,0,0,0.3); 
+	box-shadow: -5px 0px 15px 1px rgba(0,0,0,0.3);
+}
+.--right {
+	-webkit-box-shadow: 3px 0px 15px 1px rgba(0,0,0,0.2); 
+	box-shadow: 3px 0px 15px 1px rgba(0,0,0,0.2);
+}
+.--right:hover {
+	-webkit-box-shadow: 5px 0px 15px 1px rgba(0,0,0,0.3); 
+	box-shadow: 5px 0px 15px 1px rgba(0,0,0,0.3);
+}
+.flipbook-nav-prev:hover,
+.flipbook-sound-btn:hover,
+.flipbook-fullscreen-btn:hover,
+.flipbook-fullscreen-btn:hover,
+.flipbook-nav-next:hover {
+	box-shadow: 0 2px 12px rgba(0, 0, 0, .55);
+}
+.flipbook-zoom-btn:hover {
+	box-shadow: 0 1px 10px rgba(0, 0, 0, .52);
 }

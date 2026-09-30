@@ -1,10 +1,10 @@
-.fb-admin { max-width: 780px; }
-
 .fb-admin-header {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
-	margin-bottom: 1rem;
+	margin-bottom: 2rem;
+	padding-bottom: 1rem;
+	border-bottom: 1px solid grey;
 }
 
 .fb-admin h1 { font-size: 1.4rem; margin: 0 0 1rem; }
@@ -28,6 +28,7 @@
 .fb-table th { font-weight: 600; color: #374151; }
 .fb-table a { color: #2764e7; text-decoration: none; }
 .fb-table a:hover { text-decoration: underline; }
+.fb-page-count { color: #9ca3af; font-size: .8rem; }
 
 .fb-actions { text-align: right; }
 
@@ -38,10 +39,11 @@
 .fb-help-body code { background: #eef2ff; color: #2764e7; padding: .15rem .4rem; border-radius: 4px; font-size: .8125rem; }
 
 .fb-muted { color: #9ca3af; }
-.fb-ok { color: #166534; margin-left: .75rem; font-size: .875rem; }
+.fb-ok { background-color: #166534; color:#fff; padding: 5px 10px; border-radius:5px; margin-left: .75rem; font-size: .875rem; transition: opacity .6s; }
+.fb-status-fade { opacity: 0; }
 .fb-err { color: #b91c1c; margin-left: .75rem; font-size: .875rem; }
 
-.fb-btn {
+.fb-admin .fb-btn {
 	display: inline-flex;
 	align-items: center;
 	gap: .35rem;
@@ -51,16 +53,18 @@
 	font-size: .875rem;
 	font-weight: 600;
 	cursor: pointer;
-	text-decoration: none;
 }
-.fb-btn-primary { background: #2764e7; color: #fff; }
-.fb-btn-primary:hover { background: #0094f0; }
-.fb-btn-secondary { background: #eef2ff; color: #2764e7; margin-right: .4rem; }
+a.fb-btn.fb-btn-primary { background: #2764e7; color: #fff; }
+a.fb-btn.fb-btn-primary:hover { background: #0094f0; }
+.fb-btn-secondary { background: #eef2ff; color: #2764e7; margin-right: .4rem; font-weight:bold!important}
 .fb-btn-secondary:hover { background: #e0e7ff; }
 .fb-btn-danger { background: #fef2f2; color: #b91c1c; }
 .fb-btn-danger:hover { background: #fee2e2; }
 
-.fb-form { max-width: 560px; }
+.fb-admin a{
+	text-decoration: none!important;
+}
+
 .fb-field { margin-bottom: 1rem; }
 .fb-field label { display: block; font-weight: 600; font-size: .875rem; margin-bottom: .35rem; color: #1a1a2e; }
 .fb-field input[type=text], .fb-field input[type=number], .fb-field select, .fb-field textarea {
@@ -76,6 +80,7 @@
 .fb-field-inline { display: flex; gap: 1rem; align-items: flex-end; margin-bottom: 1rem; }
 .fb-field-inline label { font-weight: 600; font-size: .875rem; margin-bottom: .35rem; }
 .fb-field-inline input { width: 110px; padding: .5rem .6rem; border: 1px solid #d0d5dd; border-radius: 5px; }
+.fb-field-inline input.fb-field-wide { width: 310px; }
 
 .fb-fieldset { border: 1px solid #e5e7eb; border-radius: 6px; padding: 1rem; margin-bottom: 1.25rem; }
 .fb-fieldset legend { font-weight: 600; padding: 0 .4rem; font-size: .875rem; }
@@ -138,8 +143,6 @@
 .fb-modal { background: #fff; border-radius: 8px; width: 100%; max-height: 90vh; display: flex; flex-direction: column; overflow: hidden; }
 .fb-modal-lg { max-width: 640px; }
 
-/* Always opened from within another modal context (Add Image Page, or the
-   image picker inside the Image+Text modal) - must stack above both. */
 #fb-filebrowser-bg { z-index: 1001; }
 
 .fb-modal-head {

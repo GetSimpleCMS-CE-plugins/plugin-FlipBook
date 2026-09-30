@@ -218,8 +218,18 @@
 
 				container.classList.remove('flipbook-loading');
 
-				if (settings.show_nav_buttons || settings.show_page_numbers) {
-					buildToolbar(container, pageFlip, settings);
+				var sound = null;
+				if (settings.sound && data.soundUrl && typeof pageFlip.on === 'function') {
+					sound = { audio: new Audio(data.soundUrl), muted: false };
+					pageFlip.on('flip', function () {
+						if (sound.muted) return;
+						sound.audio.currentTime = 0;
+						sound.audio.play().catch(function () {}); // ignore autoplay-policy rejections
+					});
+				}
+
+				if (settings.show_nav_buttons || settings.show_page_numbers || sound) {
+					buildToolbar(container, pageFlip, settings, sound);
 				}
 
 				// Free addition alongside the nav buttons: left/right arrow keys flip
@@ -230,14 +240,6 @@
 					if (e.key === 'ArrowRight') { pageFlip.flipNext('top'); e.preventDefault(); }
 					else if (e.key === 'ArrowLeft') { pageFlip.flipPrev('top'); e.preventDefault(); }
 				});
-
-				if (settings.sound && data.soundUrl && typeof pageFlip.on === 'function') {
-					var audio = new Audio(data.soundUrl);
-					pageFlip.on('flip', function () {
-						audio.currentTime = 0;
-						audio.play().catch(function () {}); // ignore autoplay-policy rejections
-					});
-				}
 			})
 			.catch(function (err) {
 				console.error('FlipBook: failed to build book', err);
@@ -250,7 +252,7 @@
 	// Lives as a normal (non-absolutely-positioned) sibling after the book, so
 	// it reserves its own space in the page's normal flow instead of floating
 	// over whatever content comes next.
-	function buildToolbar(container, pageFlip, settings) {
+	function buildToolbar(container, pageFlip, settings, sound) {
 		var toolbar = document.createElement('div');
 		toolbar.className = 'flipbook-toolbar';
 
@@ -262,6 +264,10 @@
 			prev.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>';
 			prev.addEventListener('click', function () { pageFlip.flipPrev('top'); });
 			toolbar.appendChild(prev);
+		}
+
+		if (sound) {
+			toolbar.appendChild(buildSoundToggle(sound));
 		}
 
 		if (settings.show_page_numbers) {
@@ -298,6 +304,28 @@
 	// change (as opposed to a window resize) hasn't been confirmed - the
 	// update() call below is a best-effort nudge, worth specifically checking
 	// in real testing.
+	// Visitor-facing mute toggle, separate from the admin's "Page-flip sound
+	// effect" setting - that setting decides whether sound is wired up for
+	// the book at all; this lets a visitor turn it off for their own session
+	// without changing anything the admin configured.
+	function buildSoundToggle(sound) {
+		var btn = document.createElement('button');
+		btn.type = 'button';
+		btn.className = 'flipbook-nav flipbook-sound-btn';
+		btn.setAttribute('aria-label', 'Mute page-flip sound');
+		var onIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>';
+		var offIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>';
+		btn.innerHTML = onIcon;
+
+		btn.addEventListener('click', function () {
+			sound.muted = !sound.muted;
+			btn.innerHTML = sound.muted ? offIcon : onIcon;
+			btn.setAttribute('aria-label', sound.muted ? 'Unmute page-flip sound' : 'Mute page-flip sound');
+		});
+
+		return btn;
+	}
+
 	function buildFullscreenButton(container, pageFlip) {
 		var btn = document.createElement('button');
 		btn.type = 'button';
