@@ -80,7 +80,15 @@
 		tdSlug.textContent = book.slug;
 
 		var tdUpdated = document.createElement('td');
-		tdUpdated.textContent = book.updated ? new Date(book.updated * 1000).toLocaleString() : '';
+		tdUpdated.textContent = book.updated ? (function (ts) {
+			var d = new Date(ts * 1000);
+			var y = d.getFullYear();
+			var m = String(d.getMonth() + 1).padStart(2, '0');
+			var day = String(d.getDate()).padStart(2, '0');
+			var h = String(d.getHours()).padStart(2, '0');
+			var min = String(d.getMinutes()).padStart(2, '0');
+			return y + '-' + m + '-' + day + ', ' + h + ':' + min;
+		})(book.updated) : '';
 
 		var tdActions = document.createElement('td');
 		tdActions.className = 'fb-actions';

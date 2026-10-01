@@ -26,11 +26,12 @@
 	font-size: .9rem;
 }
 .fb-table th { font-weight: 600; color: #374151; }
-.fb-table a { color: #2764e7; text-decoration: none; }
+.fb-table a { color: #CC3300!important; text-decoration: none; }
 .fb-table a:hover { text-decoration: underline; }
 .fb-page-count { color: #9ca3af; font-size: .8rem; }
 
 .fb-actions { text-align: right; }
+.fb-actions a{ color: #fff!important; }
 
 .fb-help { border: 1px solid #e5e7eb; border-radius: 6px; margin-bottom: 1rem; background: #f9fafb; }
 .fb-help summary { padding: .6rem .9rem; font-weight: 600; font-size: .875rem; cursor: pointer; color: #374151; }
@@ -56,10 +57,10 @@
 }
 a.fb-btn.fb-btn-primary { background: #2764e7; color: #fff; }
 a.fb-btn.fb-btn-primary:hover { background: #0094f0; }
-.fb-btn-secondary { background: #eef2ff; color: #2764e7; margin-right: .4rem; font-weight:bold!important}
-.fb-btn-secondary:hover { background: #e0e7ff; }
-.fb-btn-danger { background: #fef2f2; color: #b91c1c; }
-.fb-btn-danger:hover { background: #fee2e2; }
+.fb-btn-secondary { background: #FFAD33; color: #fff!important; margin-right: .4rem; font-weight:bold!important}
+.fb-btn-secondary:hover { background: #FFC266; }
+.fb-btn-danger { background: #FF3333; color: #fff!important; }
+.fb-btn-danger:hover { background: #FF6666; }
 
 .fb-admin a{
 	text-decoration: none!important;

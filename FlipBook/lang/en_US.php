@@ -10,11 +10,11 @@ $i18n = [
 	'lang_Page_Singular'       => 'page',
 	'lang_Page_Plural'         => 'pages',
 	'lang_Loading'             => 'Loading…',
-	'lang_No_Books'            => 'No flip-books yet.',
+	'lang_No_Books'            => 'No Flip-Books yet.',
 	'lang_Edit'                => 'Edit',
 	'lang_Delete'              => 'Delete',
-	'lang_Confirm_Delete'      => 'Delete this flip-book? This cannot be undone.',
-	'lang_Back_To_List'        => 'Back to flip-books',
+	'lang_Confirm_Delete'      => 'Delete this Flip-Book? This cannot be undone.',
+	'lang_Back_To_List'        => 'Back to Flip Books',
 	'lang_Settings'            => 'Settings',
 	'lang_Width'               => 'Width (px)',
 	'lang_Height'              => 'Height (px)',
@@ -30,7 +30,7 @@ $i18n = [
 	'lang_Saved'               => 'Saved.',
 	'lang_Save_Error'          => 'Something went wrong — please try again.',
 	'lang_Name_Required'       => 'Name is required.',
-	'lang_Not_Found'           => 'Flip-book not found.',
+	'lang_Not_Found'           => 'Flip-Book not found.',
 	'lang_Invalid_Nonce'       => 'Your session has expired — please reload the page and try again.',
 
 	// Page builder

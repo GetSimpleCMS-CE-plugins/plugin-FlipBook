@@ -10,11 +10,11 @@ $i18n = [
 	'lang_Page_Singular'       => 'página',
 	'lang_Page_Plural'         => 'páginas',
 	'lang_Loading'             => 'Cargando…',
-	'lang_No_Books'            => 'Todavía no hay ningún flip book.',
+	'lang_No_Books'            => 'Todavía no hay ningún Flip Book.',
 	'lang_Edit'                => 'Editar',
 	'lang_Delete'              => 'Eliminar',
-	'lang_Confirm_Delete'      => '¿Eliminar este flip book? Esta acción no se puede deshacer.',
-	'lang_Back_To_List'        => 'Volver a los flip books',
+	'lang_Confirm_Delete'      => '¿Eliminar este Flip Book? Esta acción no se puede deshacer.',
+	'lang_Back_To_List'        => 'Volver a los Flip Books',
 	'lang_Settings'            => 'Ajustes',
 	'lang_Width'               => 'Ancho (px)',
 	'lang_Height'              => 'Alto (px)',
@@ -30,7 +30,7 @@ $i18n = [
 	'lang_Saved'               => 'Guardado.',
 	'lang_Save_Error'          => 'Algo salió mal — inténtalo de nuevo.',
 	'lang_Name_Required'       => 'El nombre es obligatorio.',
-	'lang_Not_Found'           => 'Flip book no encontrado.',
+	'lang_Not_Found'           => 'Flip Book no encontrado.',
 	'lang_Invalid_Nonce'       => 'Tu sesión ha caducado — recarga la página e inténtalo de nuevo.',
 
 	// Editor de páginas
