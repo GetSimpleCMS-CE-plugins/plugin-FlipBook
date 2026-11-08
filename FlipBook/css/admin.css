@@ -259,3 +259,5 @@ a.fb-btn.fb-btn-primary:hover { background: #0094f0; }
 	padding: 0 .3rem;
 }
 .fb-pdfpicker-page:not(.selected) .fb-pdfpicker-badge { display: none; }
+
+.fb-admin footer{text-align:center; margin-top: 20px; margin-bottom: -20px;}
